@@ -1,4 +1,4 @@
-#Criteria finder from binary tree in single traverse
+# Criteria Count finder from binary tree in single traverse
 
 Binary Tree provides inserting elements and then apply criteria to get count against that criteria
 
