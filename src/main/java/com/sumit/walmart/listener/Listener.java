@@ -1,4 +1,4 @@
-package com.sumit.walmart.observer;
+package com.sumit.walmart.listener;
 
 import com.sumit.walmart.Criteria;
 import com.sumit.walmart.domain.Context;
@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class Observer {
+public class Listener {
 
     private final List<Criteria> criteriaList;
 
-    public Observer(List<Criteria> criteriaList) {
+    public Listener(List<Criteria> criteriaList) {
         this.criteriaList = criteriaList;
     }
 
-    public Observer() {
+    public Listener() {
         this(new ArrayList<>());
     }
 
