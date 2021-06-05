@@ -27,9 +27,9 @@ public class Listener {
 
     public void notify(Context context) {
         if (context.getFilteredCriteria().isEmpty()) {
-            criteriaList.forEach(criteria -> criteria.apply(context.getSubject()));
+            criteriaList.parallelStream().forEach(criteria -> criteria.apply(context.getSubject()));
         } else {
-            criteriaList.stream().filter(criteria -> isMatching(criteria, context.getFilteredCriteria()))
+            criteriaList.parallelStream().filter(criteria -> isMatching(criteria, context.getFilteredCriteria()))
                     .forEach(criteria -> criteria.apply(context.getSubject()));
         }
     }

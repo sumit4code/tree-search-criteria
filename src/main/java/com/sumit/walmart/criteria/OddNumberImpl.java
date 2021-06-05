@@ -1,20 +1,22 @@
 package com.sumit.walmart.criteria;
 
-import com.sumit.walmart.Subject;
 import com.sumit.walmart.Criteria;
+import com.sumit.walmart.Subject;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class OddNumberImpl implements Criteria {
 
     public static final String IDENTIFIER = "id3";
 
-    private int count = 0;
+    private AtomicInteger count = new AtomicInteger(0);
 
     @Override
     public void apply(Subject subject) {
         if (subject.getNumber() % 2 != 0) {
-            count++;
+            count.getAndIncrement();
         }
     }
 
@@ -31,6 +33,6 @@ public class OddNumberImpl implements Criteria {
 
     @Override
     public void reset() {
-        count = 0;
+        count = new AtomicInteger(0);
     }
 }

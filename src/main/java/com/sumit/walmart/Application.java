@@ -30,5 +30,6 @@ public class Application {
         yellingService.traverseForAllCriteria(binaryTree);
 
         yellingService.traverseForFilteredCriteria(binaryTree, Arrays.asList(EventNumberImpl.IDENTIFIER, LevelTwoCountImpl.IDENTIFIER));
+        yellingService.stopYelling();
     }
 }
