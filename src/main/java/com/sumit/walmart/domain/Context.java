@@ -7,6 +7,8 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Builder
 @Data
@@ -15,4 +17,5 @@ public class Context {
     @Builder.Default
     private List<String> filteredCriteria = new ArrayList<>();
     private Subject subject;
+    private Map<String, AtomicInteger> resultMap;
 }

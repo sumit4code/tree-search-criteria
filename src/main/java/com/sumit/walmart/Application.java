@@ -29,7 +29,7 @@ public class Application {
         binaryTree.insert(49);
         yellingService.traverseForAllCriteria(binaryTree);
 
-        yellingService.traverseForFilteredCriteria(binaryTree, Arrays.asList(EventNumberImpl.IDENTIFIER, LevelTwoCountImpl.IDENTIFIER));
+        yellingService.traverseForFilteredCriteria(binaryTree, Arrays.asList(EventNumberImpl.IDENTIFIER, LevelTwoCountImpl.IDENTIFIER, OddNumberImpl.IDENTIFIER));
         yellingService.stopYelling();
     }
 }

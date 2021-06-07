@@ -11,18 +11,9 @@ public class OddNumberImpl implements Criteria {
 
     public static final String IDENTIFIER = "id3";
 
-    private AtomicInteger count = new AtomicInteger(0);
-
     @Override
-    public void apply(Subject subject) {
-        if (subject.getNumber() % 2 != 0) {
-            count.getAndIncrement();
-        }
-    }
-
-    @Override
-    public void display() {
-        log.info("Total number of odd count {}", count);
+    public boolean apply(Subject subject) {
+        return subject.getNumber() % 2 != 0;
     }
 
     @Override
@@ -30,9 +21,4 @@ public class OddNumberImpl implements Criteria {
         return IDENTIFIER;
     }
 
-
-    @Override
-    public void reset() {
-        count = new AtomicInteger(0);
-    }
 }

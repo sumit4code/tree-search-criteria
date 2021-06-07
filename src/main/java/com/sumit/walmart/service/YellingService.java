@@ -1,6 +1,5 @@
 package com.sumit.walmart.service;
 
-import com.sumit.walmart.Criteria;
 import com.sumit.walmart.Subject;
 import com.sumit.walmart.domain.Context;
 import com.sumit.walmart.listener.Listener;
@@ -9,9 +8,12 @@ import com.sumit.walmart.tree.Node;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.EMPTY_LIST;
 
@@ -32,9 +34,9 @@ public class YellingService {
     public void traverseForAllCriteria(BinaryTree binaryTree) {
         log.info("***** Getting result for all criteria *****");
         Node temp = binaryTree.getRoot();
-        listener.reset();
-        calculateAndWait(binaryTree, temp, EMPTY_LIST);
-        listener.getCriteriaList().parallelStream().forEach(Criteria::display);
+        Map<String, AtomicInteger> resultMap = new ConcurrentHashMap<>();
+        calculateAndWait(binaryTree, temp, EMPTY_LIST, resultMap);
+        resultMap.forEach((s, integer) -> log.info(" {} -> {}", s, integer));
     }
 
     /**
@@ -47,15 +49,15 @@ public class YellingService {
         log.info("***** Getting result for all filtered criteria *****");
         log.info("Filtered criteria : {}", listedCriteria);
         Node temp = binaryTree.getRoot();
-        listener.reset();
         List<String> filterDataList = listedCriteria != null ? listedCriteria : EMPTY_LIST;
-        calculateAndWait(binaryTree, temp, filterDataList);
-        listener.getCriteriaList().parallelStream().filter(criteria -> filterDataList.contains(criteria.getId())).forEach(Criteria::display);
+        Map<String, AtomicInteger> resultMap = new ConcurrentHashMap<>();
+        calculateAndWait(binaryTree, temp, filterDataList, resultMap);
+        resultMap.forEach((s, integer) -> log.info(" {} -> {}", s, integer));
     }
 
-    private void calculateAndWait(BinaryTree binaryTree, Node temp, List<String> filterDataList) {
+    private void calculateAndWait(BinaryTree binaryTree, Node temp, List<String> filterDataList, Map<String, AtomicInteger> resultMap) {
         CountDownLatch countDownLatch = new CountDownLatch(binaryTree.size());
-        inorder(binaryTree, temp, filterDataList, countDownLatch);
+        inorder(binaryTree, temp, filterDataList, countDownLatch, resultMap);
         try {
             countDownLatch.await();
         } catch (InterruptedException exception) {
@@ -63,18 +65,18 @@ public class YellingService {
         }
     }
 
-    private void inorder(BinaryTree binaryTree, Node temp, List<String> listedCriteria, CountDownLatch countDownLatch) {
+    private void inorder(BinaryTree binaryTree, Node temp, List<String> listedCriteria, CountDownLatch countDownLatch, Map<String, AtomicInteger> resultMap) {
         if (temp == null) {
             return;
         }
-        inorder(binaryTree, temp.getLeft(), listedCriteria, countDownLatch);
+        inorder(binaryTree, temp.getLeft(), listedCriteria, countDownLatch, resultMap);
         int level = binaryTree.getLevel(binaryTree.getRoot(), temp.getData());
         //   log.debug("Item : {}, Level : {}", temp.getData(), level);
         Subject subject = Subject.builder().number(temp.getData()).level(level).build();
-        Context context = Context.builder().filteredCriteria(listedCriteria).subject(subject).build();
+        Context context = Context.builder().filteredCriteria(listedCriteria).subject(subject).resultMap(resultMap).build();
 
         executorService.execute(new WorkingThread(countDownLatch, listener, context));
-        inorder(binaryTree, temp.getRight(), listedCriteria, countDownLatch);
+        inorder(binaryTree, temp.getRight(), listedCriteria, countDownLatch, resultMap);
     }
 
     public static class WorkingThread implements Runnable {
@@ -95,7 +97,7 @@ public class YellingService {
         }
     }
 
-    public void stopYelling(){
+    public void stopYelling() {
         this.executorService.shutdown();
     }
 }

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class Listener {
@@ -27,22 +28,26 @@ public class Listener {
 
     public void notify(Context context) {
         if (context.getFilteredCriteria().isEmpty()) {
-            criteriaList.parallelStream().forEach(criteria -> criteria.apply(context.getSubject()));
+            criteriaList.parallelStream()
+                    .filter(criteria -> criteria.apply(context.getSubject())).forEach(criteria -> updateResultantMap(context, criteria));
         } else {
-            criteriaList.parallelStream().filter(criteria -> isMatching(criteria, context.getFilteredCriteria()))
-                    .forEach(criteria -> criteria.apply(context.getSubject()));
+            criteriaList.parallelStream()
+                    .filter(criteria -> isMatching(criteria, context.getFilteredCriteria()))
+                    .filter(criteria -> criteria.apply(context.getSubject())).forEach(criteria -> updateResultantMap(context, criteria));
+        }
+    }
+
+    private void updateResultantMap(Context context, Criteria criteria) {
+        AtomicInteger integer = context.getResultMap().get(criteria.getId());
+        if (integer == null) {
+            context.getResultMap().put(criteria.getId(), new AtomicInteger(1));
+        } else {
+            integer.getAndIncrement();
+            context.getResultMap().put(criteria.getId(), integer);
         }
     }
 
     private boolean isMatching(Criteria criteria, List<String> filteredCriteria) {
         return filteredCriteria.contains(criteria.getId());
-    }
-
-    public void reset() {
-        criteriaList.forEach(Criteria::reset);
-    }
-
-    public List<Criteria> getCriteriaList() {
-        return criteriaList;
     }
 }
